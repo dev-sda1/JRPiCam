@@ -1,4 +1,4 @@
-package com.hopding.jrpicam;
+package com.pyxlwuff.jrpicam;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -8,13 +8,13 @@ import java.util.*;
 
 import javax.imageio.ImageIO;
 
-import com.hopding.jrpicam.enums.AWB;
-import com.hopding.jrpicam.enums.DRC;
-import com.hopding.jrpicam.enums.Encoding;
-import com.hopding.jrpicam.enums.Exposure;
-import com.hopding.jrpicam.enums.ImageEffect;
-import com.hopding.jrpicam.enums.MeteringMode;
-import com.hopding.jrpicam.exceptions.FailedToRunRaspistillException;
+import com.pyxlwuff.jrpicam.enums.AWB;
+import com.pyxlwuff.jrpicam.enums.DRC;
+import com.pyxlwuff.jrpicam.enums.Encoding;
+import com.pyxlwuff.jrpicam.enums.Exposure;
+import com.pyxlwuff.jrpicam.enums.ImageEffect;
+import com.pyxlwuff.jrpicam.enums.MeteringMode;
+import com.pyxlwuff.jrpicam.exceptions.FailedToRunRaspistillException;
 
 /**
  * RPiCamera is used to access the Raspberry Pi Camera and take still photos.
@@ -74,15 +74,20 @@ public class RPiCamera {
 	public RPiCamera(String saveDir) throws FailedToRunRaspistillException {
 		this.saveDir = saveDir;
 		try {
-			pb = new ProcessBuilder("raspistill");
-			pb.start();
+			if(RPiOSVersion.isBusterOrNewer()){
+				pb = new ProcessBuilder("libcamera-still");
+				pb.start();
+			}else{
+				pb = new ProcessBuilder("raspistill");
+				pb.start();
+			}
 		} catch (IOException e) {
-			// The IOException was most likely thrown because raspistill isn't installed
+			// The IOException was most likely thrown because raspistill, or libcamera isn't installed
 			// and/or configured properly, so throw FailedToRunRaspistillException to 
 			// indicate that.
 			throw new FailedToRunRaspistillException(
-					"RPiCamera failed to run raspistill. The JRPiCam library relies on"
-							+ "raspistill to function. Please ensure it is installed and configured"
+					"RPiCamera failed to run camera library. The JRPiCam library relies on"
+							+ "raspistill, or libcamera to function. Please ensure it is installed and configured"
 							+ "on your system.");
 		}
 		//  Set default width and height of images
@@ -121,19 +126,38 @@ public class RPiCamera {
 	 */
 	public File takeStill(String pictureName, int width, int height) throws IOException, InterruptedException {
 		List<String> command = new ArrayList<>();
-		command.add("raspistill");
-		command.add("-o");
-		command.add(saveDir + File.separator + pictureName);
-		command.add("-w");
-		command.add("" + width);
-		command.add("-h");
-		command.add("" + height);
-		for (Map.Entry<String, String[]> entry : options.entrySet()) {
-			if (entry.getValue() != null        &&
-                !"width".equals(entry.getKey()) &&
-                !"height".equals(entry.getKey())) {
-                command.addAll(Arrays.asList(entry.getValue()));
+		if(RPiOSVersion.isBusterOrNewer()){
+			command.add("libcamera-still");
+			command.add("-o");
+			command.add(saveDir + File.separator + pictureName);
+			command.add("--width");
+			command.add("" + width);
+			command.add("--height");
+			command.add("" + height);
+			for (Map.Entry<String, String[]> entry : options.entrySet()) {
+				if (entry.getValue() != null        &&
+						!"width".equals(entry.getKey()) &&
+						!"height".equals(entry.getKey())) {
+					command.addAll(Arrays.asList(entry.getValue()));
+				}
 			}
+
+		}else{
+			command.add("raspistill");
+			command.add("-o");
+			command.add(saveDir + File.separator + pictureName);
+			command.add("-w");
+			command.add("" + width);
+			command.add("-h");
+			command.add("" + height);
+			for (Map.Entry<String, String[]> entry : options.entrySet()) {
+				if (entry.getValue() != null        &&
+						!"width".equals(entry.getKey()) &&
+						!"height".equals(entry.getKey())) {
+					command.addAll(Arrays.asList(entry.getValue()));
+				}
+			}
+
 		}
 		prevCommand = command.toString();
 		pb = new ProcessBuilder(command);
@@ -204,20 +228,37 @@ public class RPiCamera {
 	 */
 	public BufferedImage takeBufferedStill(int width, int height) throws IOException, InterruptedException {
 		List<String> command = new ArrayList<>();
-		command.add("raspistill");
-		command.add("-o");
-		command.add("-v");
-		command.add("-w");
-		command.add("" + width);
-		command.add("-h");
-		command.add("" + height);
-		for (Map.Entry<String, String[]> entry : options.entrySet()) {
-			if (entry.getValue() != null        &&
-                !entry.getKey().equals("width") &&
-                !entry.getKey().equals("height")) {
-                Collections.addAll(command, entry.getValue());
+		if(RPiOSVersion.isBusterOrNewer()){
+			command.add("libcamera-still");
+			command.add("-o");
+			command.add("--width");
+			command.add("" + width);
+			command.add("--height");
+			command.add("" + height);
+			for (Map.Entry<String, String[]> entry : options.entrySet()) {
+				if (entry.getValue() != null        &&
+						!entry.getKey().equals("width") &&
+						!entry.getKey().equals("height")) {
+					Collections.addAll(command, entry.getValue());
+				}
+			}
+		}else{
+			command.add("raspistill");
+			command.add("-o");
+			command.add("-v");
+			command.add("-w");
+			command.add("" + width);
+			command.add("-h");
+			command.add("" + height);
+			for (Map.Entry<String, String[]> entry : options.entrySet()) {
+				if (entry.getValue() != null        &&
+						!entry.getKey().equals("width") &&
+						!entry.getKey().equals("height")) {
+					Collections.addAll(command, entry.getValue());
+				}
 			}
 		}
+
 		prevCommand = command.toString();
 		pb = new ProcessBuilder(command);
 		
@@ -322,20 +363,39 @@ public class RPiCamera {
 	 */
 	public int[] takeStillAsRGB(int width, int height, boolean keepPadding) throws IOException {
 		List<String> command = new ArrayList<>();
-		command.add("raspiyuv");
-		command.add("-rgb");
-		command.add("-o");
-		command.add("-v");
-		command.add("-w");
-		command.add("" + width);
-		command.add("-h");
-		command.add("" + height);
-		for (Map.Entry<String, String[]> entry : options.entrySet()) {
-			if (entry.getValue() != null        &&
-                !entry.getKey().equals("width") &&
-                !entry.getKey().equals("height")) {
-                Collections.addAll(command, entry.getValue());
+		if(RPiOSVersion.isBusterOrNewer()){
+			command.add("libcamera-still");
+			command.add("-e rgb");
+			command.add("-o");
+			command.add("-w");
+			command.add("" + width);
+			command.add("-h");
+			command.add("" + height);
+			for (Map.Entry<String, String[]> entry : options.entrySet()) {
+				if (entry.getValue() != null        &&
+						!entry.getKey().equals("width") &&
+						!entry.getKey().equals("height")) {
+					Collections.addAll(command, entry.getValue());
+				}
 			}
+
+		}else{
+			command.add("raspiyuv");
+			command.add("-rgb");
+			command.add("-o");
+			command.add("-v");
+			command.add("-w");
+			command.add("" + width);
+			command.add("-h");
+			command.add("" + height);
+			for (Map.Entry<String, String[]> entry : options.entrySet()) {
+				if (entry.getValue() != null        &&
+						!entry.getKey().equals("width") &&
+						!entry.getKey().equals("height")) {
+					Collections.addAll(command, entry.getValue());
+				}
+			}
+
 		}
 		prevCommand = command.toString();
 		pb = new ProcessBuilder(command);

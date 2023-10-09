@@ -1,4 +1,4 @@
-package com.hopding.jrpicam.examples;
+package com.pyxlwuff.jrpicam.examples;
 
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -21,12 +21,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import com.hopding.jrpicam.RPiCamera;
-import com.hopding.jrpicam.enums.AWB;
-import com.hopding.jrpicam.enums.DRC;
-import com.hopding.jrpicam.enums.Encoding;
-import com.hopding.jrpicam.enums.Exposure;
-import com.hopding.jrpicam.exceptions.FailedToRunRaspistillException;
+import com.pyxlwuff.jrpicam.RPiCamera;
+import com.pyxlwuff.jrpicam.enums.AWB;
+import com.pyxlwuff.jrpicam.enums.DRC;
+import com.pyxlwuff.jrpicam.enums.Encoding;
+import com.pyxlwuff.jrpicam.enums.Exposure;
+import com.pyxlwuff.jrpicam.exceptions.FailedToRunRaspistillException;
 
 public class DemoView {
 	

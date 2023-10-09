@@ -1,4 +1,4 @@
-package com.hopding.jrpicam.enums;
+package com.pyxlwuff.jrpicam.enums;
 
 /**
  * Metering mode options.

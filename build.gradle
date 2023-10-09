@@ -1,27 +1,29 @@
-group 'hopding.jrpicam'
-version '1.1.1'
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
 
-apply plugin: 'java'
-apply plugin: 'maven'
 
-sourceCompatibility = 1.8
+group 'com.pyxlwuff'
+version '1.1.2-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testImplementation group: 'junit', name: 'junit', version: '4.11'
 }
 
 // Don't include example classes in the javadoc
 javadoc {
-    exclude ('com/hopding/jrpicam/examples/**')
+    exclude ('com/pyxlwuff/jrpicam/examples/**')
 }
 
 // Don't include the example classes in the library JAR
 jar {
-    exclude ('com/hopding/jrpicam/examples/**')
+    exclude ('com/pyxlwuff/jrpicam/examples/**')
 }
 
 // Generate JAR with all classes from this project to use
@@ -37,7 +39,7 @@ task demoViewJAR(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Demo View',
                 'Implementation-Version': version,
-                'Main-Class': 'com.hopding.jrpicam.examples.DemoView'
+                'Main-Class': 'com.pyxlwuff.jrpicam.examples.DemoView'
     }
     baseName = 'demo-view'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -49,7 +51,7 @@ task shootBufferedStillJAR(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Shoot Buffered Still',
                 'Implementation-Version': version,
-                'Main-Class': 'com.hopding.jrpicam.examples.ShootBufferedStill'
+                'Main-Class': 'com.pyxlwuff.jrpicam.examples.ShootBufferedStill'
     }
     baseName = 'shoot-buffered-still'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -61,7 +63,7 @@ task shootStillJAR(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'ShootStill',
                 'Implementation-Version': version,
-                'Main-Class': 'com.hopding.jrpicam.examples.ShootStill'
+                'Main-Class': 'com.pyxlwuff.jrpicam.examples.ShootStill'
     }
     baseName = 'shoot-still'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -73,7 +75,7 @@ task shootTimelapseJAR(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Shoot Time Lapse',
                 'Implementation-Version': version,
-                'Main-Class': 'com.hopding.jrpicam.examples.ShootTimelapse'
+                'Main-Class': 'com.pyxlwuff.jrpicam.examples.ShootTimelapse'
     }
     baseName = 'shoot-timelapse'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -86,3 +88,19 @@ task buildExamples (dependsOn: [
         'shootBufferedStillJAR',
         'shootStillJAR',
         'shootTimelapseJAR'])
+
+publishing {
+    publications {
+        mavenJava(MavenPublication){
+            from components.java
+
+            groupId = 'com.pyxlwuff'
+            artifactId = 'jrpicam'
+            version = '1.1.2-SNAPSHOT'
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}

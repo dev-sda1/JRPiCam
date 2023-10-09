@@ -6,11 +6,11 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.hopding.jrpicam.RPiCamera;
-import com.hopding.jrpicam.enums.AWB;
-import com.hopding.jrpicam.enums.DRC;
-import com.hopding.jrpicam.enums.Encoding;
-import com.hopding.jrpicam.exceptions.FailedToRunRaspistillException;
+import com.pyxlwuff.jrpicam.RPiCamera;
+import com.pyxlwuff.jrpicam.enums.AWB;
+import com.pyxlwuff.jrpicam.enums.DRC;
+import com.pyxlwuff.jrpicam.enums.Encoding;
+import com.pyxlwuff.jrpicam.exceptions.FailedToRunRaspistillException;
 
 /**
  * ShootBufferedStill is an example of how to take and buffer a still image using JRPiCam.
